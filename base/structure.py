@@ -386,7 +386,7 @@ class structure_t(object):
         return idaapi.set_struc_name(self.id, string)
 
     @property
-    def comment(self, repeatable=True):
+    def comment(self):
         '''Return the repeatable comment for the structure.'''
         return idaapi.get_struc_cmt(self.id, repeatable) or idaapi.get_struc_cmt(self.id, not repeatable)
     @comment.setter
@@ -477,6 +477,7 @@ class structure_t(object):
         '''Return the member at the specified offset.'''
         return self.members.by_offset(offset + self.members.baseoffset)
 
+    @document.hidden
     def copy(self, name):
         '''Copy members into the structure ``name``.'''
         raise NotImplementedError
