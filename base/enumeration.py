@@ -239,6 +239,7 @@ def list(**type):
     return
 
 ## members
+@document.namespace
 class members(object):
     """
     This namespace allows one to interact with the members belonging
