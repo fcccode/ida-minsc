@@ -24,6 +24,7 @@ import logging
 
 import idaapi, internal
 import database as _database
+from internal import document
 
 ## TODO:
 # locate window under current cursor position
@@ -55,6 +56,7 @@ def ask(string, **default):
     res = idaapi.ask_yn(state[dflt], string)
     return results.get(res, None)
 
+@document.namespace
 class current(object):
     """
     This namespace contains tools for fetching information about the
@@ -120,6 +122,7 @@ class current(object):
         # FIXME: cast this to a QWindow somehow?
         return window.main()
 
+@document.namespace
 class state(object):
     """
     This namespace is for fetching or interacting with the current
@@ -154,6 +157,7 @@ class state(object):
 
 wait, beep, refresh = internal.utils.alias(state.wait, 'state'), internal.utils.alias(state.beep, 'state'), internal.utils.alias(state.refresh, 'state')
 
+@document.namespace
 class appwindow(object):
     """
     Base namespace used for interacting with the windows provided by IDA.
@@ -171,6 +175,7 @@ class appwindow(object):
         res = cls.open()
         return res.deleteLater()
 
+@document.namespace
 class disassembly(appwindow):
     """
     This namespace is for interacting with the Disassembly window.
@@ -183,6 +188,7 @@ class disassembly(appwindow):
         '''Refresh the main IDA disassembly view.'''
         return idaapi.refresh_idaview_anyway()
 
+@document.namespace
 class exports(appwindow):
     """
     This namespace is for interacting with the Exports window.
@@ -190,6 +196,7 @@ class exports(appwindow):
     __open__ = staticmethod(idaapi.open_exports_window)
     __open_defaults__ = (idaapi.BADADDR, )
 
+@document.namespace
 class imports(appwindow):
     """
     This namespace is for interacting with the Imports window.
@@ -197,6 +204,7 @@ class imports(appwindow):
     __open__ = staticmethod(idaapi.open_imports_window)
     __open_defaults__ = (idaapi.BADADDR, )
 
+@document.namespace
 class names(appwindow):
     """
     This namespace is for interacting with the Names window.
@@ -241,6 +249,7 @@ class names(appwindow):
             yield cls.at(idx)
         return
 
+@document.namespace
 class functions(appwindow):
     """
     This namespace is for interacting with the Functions window.
@@ -248,6 +257,7 @@ class functions(appwindow):
     __open__ = staticmethod(idaapi.open_funcs_window)
     __open_defaults__ = (idaapi.BADADDR, )
 
+@document.namespace
 class structures(appwindow):
     """
     This namespace is for interacting with the Structures window.
@@ -255,6 +265,7 @@ class structures(appwindow):
     __open__ = staticmethod(idaapi.open_structs_window)
     __open_defaults__ = (idaapi.BADADDR, 0)
 
+@document.namespace
 class strings(appwindow):
     """
     This namespace is for interacting with the Strings window.
@@ -310,6 +321,7 @@ class strings(appwindow):
             yield si.ea, idaapi.get_ascii_contents(si.ea, si.length, si.type)
         return
 
+@document.namespace
 class segments(appwindow):
     """
     This namespace is for interacting with the Segments window.
@@ -317,6 +329,7 @@ class segments(appwindow):
     __open__ = staticmethod(idaapi.open_segments_window)
     __open_defaults__ = (idaapi.BADADDR, )
 
+@document.namespace
 class notepad(appwindow):
     """
     This namespace is for interacting with the Notepad window.
@@ -324,6 +337,7 @@ class notepad(appwindow):
     __open__ = staticmethod(idaapi.open_notepad_window)
     __open_defaults__ = ()
 
+@document.namespace
 class timer(object):
     """
     This namespace is for registering a python callable to a timer in IDA.
@@ -353,6 +367,7 @@ class timer(object):
         return
 
 ### updating the state of the colored navigation band
+@document.namespace
 class navigation(object):
     """
     This namespace is for updating the state of the colored navigation band.
@@ -403,6 +418,7 @@ class navigation(object):
 
 ### interfacing with IDA's menu system
 # FIXME: add some support for actually manipulating menus
+@document.namespace
 class menu(object):
     """
     This namespace is for registering items in IDA's menu system.
@@ -428,6 +444,7 @@ class menu(object):
         return
 
 ### Qt wrappers and namespaces
+@document.namespace
 class window(object):
     """
     This namespace is for selecting a specific or particular window.
@@ -443,6 +460,7 @@ class window(object):
         q = application()
         return q.activeWindow()
 
+@document.namespace
 class windows(object):
     """
     Interact with any or all of the top-level windows for the application.
@@ -453,14 +471,17 @@ class windows(object):
         q = application()
         return q.topLevelWindows()
 
+@document.namespace
 class widget(object):
     """
     This namespace is for selecting a specific or particular widget.
     """
+    @document.hidden
     def __new__(self, (x, y)):
         '''Return the widget at the specified ``x`` and ``y`` coordinate.'''
         res = (x, y)
         return cls.at(res)
+    @document.parameters(x='The X coordinate of the widget', y='The Y coordinate of the widget')
     @classmethod
     def at(cls, (x, y)):
         '''Return the widget at the specified ``x`` and ``y`` coordinate.'''
@@ -472,6 +493,7 @@ class widget(object):
         '''Return an IDA plugin form as a UI widget.'''
         raise NotImplementedError
 
+@document.namespace
 class clipboard(object):
     """
     This namespace is for interacting with the current clipboard state.
@@ -482,6 +504,7 @@ class clipboard(object):
         clp = application()
         return clp.clipboard()
 
+@document.namespace
 class mouse(object):
     """
     Base namespace for interacting with the mouse input.
@@ -498,6 +521,7 @@ class mouse(object):
         '''Return the current `(x, y)` position of the cursor.'''
         raise NotImplementedError
 
+@document.namespace
 class keyboard(object):
     """
     Base namespace for interacting with the keyboard input.
@@ -540,6 +564,7 @@ try:
         q = PyQt5.Qt.qApp
         return q.instance()
 
+    @document.namespace
     class mouse(mouse):
         """
         This namespace is for interacting with the mouse input.
@@ -551,6 +576,7 @@ try:
             res = qt.pos()
             return res.x(), res.y()
 
+    @document.namespace
     class keyboard(keyboard):
         """
         This namespace is for interacting with the keyboard input.
@@ -560,6 +586,7 @@ try:
             '''Return the current keyboard input context.'''
             raise NotImplementedError
 
+    @document.classdef
     class UIProgress(object):
         """
         Helper class used to simplify the showing of a progress bar in IDA's UI.
@@ -648,6 +675,7 @@ try:
                 self.object.setValue(options['value'])
             return res
 
+    @document.namespace
     class widget(widget):
         """
         This namespace is for selecting a specific or particular widget.
@@ -671,6 +699,7 @@ try:
         res = PySide.QtCore.QCoreApplication
         return res.instance()
 
+    @document.namespace
     class mouse(mouse):
         """
         This namespace is for interacting with the mouse input.
@@ -682,6 +711,7 @@ try:
             res = qt.pos()
             return res.x(), res.y()
 
+    @document.namespace
     class keyboard(keyboard):
         """
         PySide keyboard interface.
@@ -691,6 +721,7 @@ try:
             '''Return the current keyboard input context.'''
             return q.inputContext()
 
+    @document.namespace
     class widget(widget):
         """
         This namespace is for selecting a specific or particular widget.
@@ -705,6 +736,7 @@ except ImportError:
     logging.info("{:s}:Unable to locate PySide module.".format(__name__))
 
 ### wrapper that uses a priorityhook around IDA's hooking capabilities.
+@document.hidden
 class hook(object):
     """
     This namespace exposes the ability to hook different parts of IDA.
@@ -743,6 +775,7 @@ class hook(object):
 
 ### for queueing the execution of a function asynchronously.
 ## (which is probably pretty unsafe in IDA, but let's hope).
+@document.namespace
 class queue(object):
     """
     This namespace exposes the ability to queue execution of python
@@ -788,6 +821,7 @@ class queue(object):
 
 ### Helper classes to use or inherit from
 # XXX: why was this base class implemented again??
+@document.classdef
 class InputBox(idaapi.PluginForm):
     """
     A class designed to be inherited from that can be used
@@ -806,6 +840,7 @@ class InputBox(idaapi.PluginForm):
         return super(InputBox, self).Show(caption, options)
 
 ### Console-only progress bar
+@document.classdef
 class ConsoleProgress(object):
     """
     Helper class used to simplify the showing of a progress bar in IDA's console.
@@ -850,6 +885,7 @@ class ConsoleProgress(object):
         return self.__value__
 
 ### Fake progress bar class that instantiates whichever one is available
+@document.classdef
 class Progress(object):
     """
     The default progress bar in with which to show progress. This class will
