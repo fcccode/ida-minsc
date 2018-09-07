@@ -451,7 +451,7 @@ class segments(object):
 
     @utils.multicase(name=basestring)
     @classmethod
-    @document.parameters(string='the glob to filter the segment names with.')
+    @document.parameters(name='the glob to filter the segment names with.')
     def iterate(cls, name):
         '''List all of the segments defined in the database that match the glob ``name``.'''
         return cls.list(like=string)
@@ -464,13 +464,13 @@ class segments(object):
 
     @utils.multicase(name=basestring)
     @classmethod
-    @document.parameters(string='the glob to filter the segment names with.')
+    @document.parameters(name='the glob to filter the segment names with.')
     def iterate(cls, name):
         '''Iterate through all of the segments in the database with a glob that matches ``name``.'''
         return cls.iterate(like=string)
     @utils.multicase()
     @classmethod
-    @document.parameters(type='any keyword that can be used to segments with.')
+    @document.parameters(type='any keyword that can be used to filter segments with.')
     def iterate(cls, **type):
         '''Iterate through all the segments defined in the database matching the keyword specified by``type``.'''
         return segment.__iterate__(**type)
@@ -558,12 +558,12 @@ def read(ea, size):
     return idaapi.get_many_bytes(ea, end-start) or ''
 
 @utils.multicase(data=bytes)
-@document.parameters(data='the data to write')
+@document.parameters(data='the data to write', persist='if ``persist`` is set to true, then write to the original bytes in the database')
 def write(data, **persist):
     '''Modify the database at the current address with the bytes specified in ``data``.'''
     return write(ui.current.address(), data, **persist)
 @utils.multicase(ea=six.integer_types, data=bytes)
-@document.parameters(ea='the address to write to', data='the data to write')
+@document.parameters(ea='the address to write to', data='the data to write', persist='if ``persist`` is set to true, then write to the original bytes in the database')
 def write(ea, data, **persist):
     """Modify the database at address ``ea`` with the bytes specified in ``data``
 
@@ -692,7 +692,7 @@ class names(object):
         res = idaapi.get_nlist_idx(ea)
         return idaapi.get_nlist_name(res)
     @classmethod
-    @document.parameters(ea='the index of a symbol')
+    @document.parameters(index='the index of the symbol in the names list')
     def address(cls, index):
         '''Return the address of the string at ``index``.'''
         return idaapi.get_nlist_ea(index)
@@ -730,7 +730,7 @@ class search(object):
     @document.aliases('search.byBytes')
     @utils.multicase(string=bytes)
     @staticmethod
-    @document.parameters(string='the bytes to search for')
+    @document.parameters(string='the bytes to search for', direction='if `reverse` is specified as true then search backwards')
     def by_bytes(string, **direction):
         '''Search through the database at the current address for the bytes specified by ``string``.'''
         return search.by_bytes(ui.current.address(), string, **direction)
@@ -850,6 +850,7 @@ class search(object):
             ea = predicate(address.next(ea), string)
         return
 
+    @document.parameters(string='the string to search for')
     def __new__(cls, string):
         '''Search through the database for the specified ``string``.'''
         return cls.by_name(ui.current.address(), string)
@@ -892,11 +893,12 @@ def go_offset(offset):
 goof = gooffset = gotooffset = goto_offset = utils.alias(go_offset)
 
 @utils.multicase()
+@document.parameters(flags='any number of `idaapi.GN_*` flags to fetch the name')
 def name(**flags):
     '''Returns the name at the current address.'''
     return name(ui.current.address(), **flags)
 @utils.multicase(ea=six.integer_types)
-@document.parameters(ea='an address in the database')
+@document.parameters(ea='an address in the database', flags='any number of `idaapi.GN_*` flags to fetch the name')
 def name(ea, **flags):
     """Return the name defined at the address specified by ``ea``.
 
@@ -920,17 +922,17 @@ def name(ea, **flags):
     # return the name at the specified address or not
     return aname or None
 @utils.multicase(string=basestring)
-@document.parameters(string='a string to use as the name', suffix='any other strings to append to the name')
+@document.parameters(string='a string to use as the name', suffix='any other strings to append to the name', flags='any number of `idaapi.SN_*` flags to set the name')
 def name(string, *suffix, **flags):
     '''Renames the current address to ``string``.'''
     return name(ui.current.address(), string, *suffix, **flags)
 @utils.multicase(none=types.NoneType)
-@document.parameters(none='the value `None`')
+@document.parameters(none='the value `None`', flags='any number of `idaapi.SN_*` flags to set the name')
 def name(none, **flags):
     '''Removes the name at the current address.'''
     return name(ui.current.address(), '', **flags)
 @utils.multicase(ea=six.integer_types, string=basestring)
-@document.parameters(ea='an address in the database', string='a string to use as the name', suffix='any other strings to append to the name')
+@document.parameters(ea='an address in the database', string='a string to use as the name', suffix='any other strings to append to the name', flags='any number of `idaapi.SN_*` flags to set the name')
 def name(ea, string, *suffix, **flags):
     """Renames the address  specified by ``ea`` to ``string``.
 
@@ -1002,7 +1004,7 @@ def name(ea, string, *suffix, **flags):
         raise ValueError("{:s}.name({:#x}, {!r}{:s}) : Unable to call idaapi.set_name({:#x}, {!r}, {:#x}).".format(__name__, ea, string, ", {:s}".format(', '.join("{:s}={!r}".format(key, value) for key, value in six.iteritems(flags))) if flags else '', ea, string, flags.get('flags', fl)))
     return res
 @utils.multicase(ea=six.integer_types, none=types.NoneType)
-@document.parameters(ea='an address in the database', none='the value `None`')
+@document.parameters(ea='an address in the database', none='the value `None`', flags='any number of `idaapi.SN_*` flags to set the name')
 def name(ea, none, **flags):
     '''Removes the name defined at the address ``ea``.'''
     return name(ea, '', **flags)
@@ -3597,14 +3599,14 @@ class xref(object):
     @document.aliases('xref.ac')
     @utils.multicase(target=six.integer_types)
     @staticmethod
-    @document.parameters(target='the target address to add a code reference to')
+    @document.parameters(target='the target address to add a code reference to', reftype='if ``call`` is set to true, this specify that this reference is a function call')
     def add_code(target, **reftype):
         '''Add a code reference from the current address to ``target``.'''
         return xref.add_code(ui.current.address(), target, **reftype)
     @document.aliases('xref.ac')
     @utils.multicase(six=six.integer_types, target=six.integer_types)
     @staticmethod
-    @document.parameters(ea='an address in the database', target='the target address to add a code reference to')
+    @document.parameters(ea='an address in the database', target='the target address to add a code reference to', reftype='if ``call`` is set to true, this specify that this reference is a function call')
     def add_code(ea, target, **reftype):
         """Add a code reference from address ``ea`` to ``target``.
 
@@ -3624,14 +3626,14 @@ class xref(object):
     @document.aliases('xref.ad')
     @utils.multicase(target=six.integer_types)
     @staticmethod
-    @document.parameters(target='the target address to add a data reference to')
+    @document.parameters(target='the target address to add a data reference to', reftype='if ``write`` is set to true, then specify that this reference writes to its target')
     def add_data(target, **reftype):
         '''Add a data reference from the current address to ``target``.'''
         return xref.add_data(ui.current.address(), target, **reftype)
     @document.aliases('xref.ad')
     @utils.multicase(ea=six.integer_types, target=six.integer_types)
     @staticmethod
-    @document.parameters(ea='an address in the database', target='the target address to add a data reference to')
+    @document.parameters(ea='an address in the database', target='the target address to add a data reference to', reftype='if ``write`` is set to true, then specify that this reference writes to its target')
     def add_data(ea, target, **reftype):
         """Add a data reference from the address ``ea`` to ``target``.
 
@@ -3731,7 +3733,7 @@ class marks(object):
         return cls.new(ui.current.address(), description)
     @utils.multicase(ea=six.integer_types, description=basestring)
     @classmethod
-    @document.parameters(ea='the address to set the mark at', description='the description associated with the mark')
+    @document.parameters(ea='the address to set the mark at', description='the description associated with the mark', extra='allows you to assign the ``x``, ``y``, or ``lnnum`` fields of the mark')
     def new(cls, ea, description, **extra):
         '''Create a mark at the address ``ea`` with the given ``description`` and return its index.'''
         ea = interface.address.inside(ea)
@@ -4904,7 +4906,7 @@ class get(object):
         return cls.structure(ui.current.address())
     @utils.multicase(ea=six.integer_types)
     @classmethod
-    @document.parameters(ea='the address of a structure in the database', length='if ``structure`` contains a `structure_t` then cast the address to it')
+    @document.parameters(ea='the address of a structure in the database', structure='if ``structure`` contains a `structure_t` then cast the address to it')
     def structure(cls, ea, **structure):
         """Return the `structure_t` at address ``ea`` as a dict of ctypes.
 
