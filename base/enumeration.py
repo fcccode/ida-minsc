@@ -301,7 +301,7 @@ class members(object):
     ## scope
     @document.aliases('member.new', 'member.create')
     @classmethod
-    @document.parameters(enum='the enumeration to add a member to', name='the name of the enumeration member', value='the value of the enumeration member', bitmask='if `bitmask` is specified, then use it as the bitmask for the enumeration')
+    @document.parameters(enum='the enumeration to add a member to', name='the name of the enumeration member', value='the value of the enumeration member', bitmask='if ``bitmask`` is specified as an integer, then use it as the bitmask for the enumeration')
     def add(cls, enum, name, value, **bitmask):
         """Add an enumeration member ``name`` with the specified ``value`` to the enumeration ``enum``.
 
@@ -584,7 +584,7 @@ class member(object):
         return cls.value(mid)
     @utils.multicase(mid=six.integer_types, value=six.integer_types)
     @classmethod
-    @document.parameters(mid='the identifier of the member to set the value of', value='the value to set the member to', bitmask='if `bitmask` is specified, then use it as the bitmask to assign to the value')
+    @document.parameters(mid='the identifier of the member to set the value of', value='the value to set the member to', bitmask='if ``bitmask`` is specified as an integer, then use it as the bitmask to assign to the value')
     def value(cls, mid, value, **bitmask):
         """Set the ``value`` for the enumeration ``member`` belonging to ``enum``.
 
@@ -594,7 +594,7 @@ class member(object):
         return idaapi.set_enum_member_value(mid, value, bmask)
     @utils.multicase(value=six.integer_types)
     @classmethod
-    @document.parameters(enum='the enumeration containing the member to set the value for', member='the member to set the value of', value='the value to apply', bitmask='if `bitmask` is specified then use it as the bitmask to assign to the value')
+    @document.parameters(enum='the enumeration containing the member to set the value for', member='the member to set the value of', value='the value to apply', bitmask='if ``bitmask`` is specified as an integer, then use it as the bitmask to assign to the value')
     def value(cls, enum, member, value, **bitmask):
         """Set the ``value`` for the enumeration ``member`` belonging to ``enum``.
 
