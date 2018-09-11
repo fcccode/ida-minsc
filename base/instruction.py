@@ -1214,7 +1214,6 @@ del(operand_types)
 
 ## intel operands
 @document.namespace
-@document.rename('intel-operands')
 class intelops:
     """
     This internal namespace contains the different operand types that
@@ -1293,7 +1292,6 @@ class intelops:
 
 ## arm operands
 @document.namespace
-@document.rename('arm-operands')
 class armops:
     """
     This internal namespace contains the different operand types that
@@ -1408,7 +1406,6 @@ class armops:
 
 ## mips operands
 @document.namespace
-@document.rename('mips-operands')
 class mipsops:
     """
     This internal namespace contains the different operand types that
