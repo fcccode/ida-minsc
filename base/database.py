@@ -777,14 +777,14 @@ class search(object):
     @document.aliases('search.byText')
     @utils.multicase(string=basestring)
     @staticmethod
-    @document.parameters(string='the text string to search for', options='if `reverse` is specified as true then search backwards. if `sensitive` is true, then search with regards to the case.')
+    @document.parameters(string='the text string to search for', options='if ``reverse`` is specified as true then search backwards. if ``sensitive`` is true, then search with regards to the case.')
     def by_text(string, **options):
         '''Search through the database at the current address for the text matched by ``string``.'''
         return search.by_text(ui.current.address(), string, **options)
     @document.aliases('search.byText')
     @utils.multicase(ea=six.integer_types, string=basestring)
     @staticmethod
-    @document.parameters(ea='the starting address to search from', string='the text string to search for', options='if `reverse` is specified as true then search backwards. if `sensitive` is true, then search with regards to the case.')
+    @document.parameters(ea='the starting address to search from', string='the text string to search for', options='if ``reverse`` is specified as true then search backwards. if ``sensitive`` is true, then search with regards to the case.')
     def by_text(ea, string, **options):
         """Search the database at address ``ea`` for the text matched by ``string``.
 
@@ -801,14 +801,14 @@ class search(object):
     @document.aliases('search.byName')
     @utils.multicase(name=basestring)
     @staticmethod
-    @document.parameters(name='the identifier to search for', options='if `reverse` is specified as true then search backwards. if `sensitive` is true, then search with regards to the case.')
+    @document.parameters(name='the identifier to search for', options='if ``reverse`` is specified as true then search backwards. if ``sensitive`` is true, then search with regards to the case.')
     def by_name(name, **options):
         '''Search through the database at the current address for the symbol ``name``.'''
         return search.by_name(ui.current.address(), name, **options)
     @document.aliases('search.byName')
     @utils.multicase(ea=six.integer_types, name=basestring)
     @staticmethod
-    @document.parameters(ea='the starting address to search from', name='the identifier to search for', options='if `reverse` is specified as true then search backwards. if `sensitive` is true, then search with regards to the case.')
+    @document.parameters(ea='the starting address to search from', name='the identifier to search for', options='if ``reverse`` is specified as true then search backwards. if ``sensitive`` is true, then search with regards to the case.')
     def by_name(ea, name, **options):
         """Search through the database at address ``ea`` for the symbol ``name``.
 
@@ -824,13 +824,13 @@ class search(object):
 
     @utils.multicase(string=basestring)
     @staticmethod
-    @document.parameters(string='the bytes to search for', options='any options to pass to the `predicate`')
+    @document.parameters(string='the bytes to search for', options='any options to pass to the ``predicate``')
     def iterate(string, **options):
         '''Iterate through all search results that match the bytes ``string`` starting at the current address.'''
         return search.iterate(ui.current.address(), string, search.by_bytes, **options)
     @utils.multicase(string=basestring, predicate=callable)
     @staticmethod
-    @document.parameters(string='the string to pass to the `predicate`', predicate='the callable to search with', options='any options to pass to the `predicate`')
+    @document.parameters(string='the string to pass to the ``predicate``', predicate='the callable to search with', options='any options to pass to the ``predicate``')
     def iterate(string, predicate, **options):
         '''Iterate through all search results matched by the function ``predicate`` with the specified ``string`` starting at the current address.'''
         return search.iterate(ui.current.address(), string, predicate, **options)
@@ -842,7 +842,7 @@ class search(object):
         return search.iterate(start, string, search.by_bytes, **options)
     @utils.multicase(start=six.integer_types, string=basestring, predicate=callable)
     @staticmethod
-    @document.parameters(start='the starting address to search from', string='the string to pass to the predicate', predicate='the callable to search with', options='any options to pass to the `predicate`')
+    @document.parameters(start='the starting address to search from', string='the string to pass to the predicate', predicate='the callable to search with', options='any options to pass to the ``predicate``')
     def iterate(start, string, predicate, **options):
         '''Iterate through all search results matched by the function ``predicate`` with the specified ``string`` starting at address ``start``.'''
         ea = predicate(start, string, **options)
@@ -1044,7 +1044,7 @@ def color(ea, none):
     '''Remove the color at the address ``ea``.'''
     return idaapi.set_item_color(interface.address.inside(ea), 0xffffffff)
 @utils.multicase(ea=six.integer_types, rgb=six.integer_types)
-@document.parameters(ea='an address in the database', rgb='the color as a red, green, and blue integer (`0x00RRGGBB`)')
+@document.parameters(ea='an address in the database', rgb='the color as a red, green, and blue integer (``0x00RRGGBB``)')
 def color(ea, rgb):
     '''Set the color at address ``ea`` to ``rgb``.'''
     r,b = (rgb&0xff0000) >> 16, rgb&0x0000ff
